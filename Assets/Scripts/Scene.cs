@@ -34,14 +34,52 @@ public class Scene : MonoBehaviour
         // Here you may use "debug rays" to visualise rays in the scene.
 
         // Image plane "corner" rays first (frustum edges).
-        this.debug.Ray(new Ray(Vector3.zero, NormalizedImageToWorldCoord(0f, 0f)), Color.blue);
-        
+        this.debug.Ray(new Ray(Vector3.zero, NormalizedImageToWorldCoord(0f, 0f)), Color.blue);  // Why is the Top Left the basis and not the center of the grid?
+
         // Add more rays to visualise here...
+        // Top Right
+        this.debug.Ray(new Ray(Vector3.zero, NormalizedImageToWorldCoord(1f, 1f)), Color.blue);  // why does this go bottom right?
+
+        // Bottom Left
+        this.debug.Ray(new Ray(Vector3.zero, NormalizedImageToWorldCoord(0f, 1f)), Color.blue);
+
+        // Bottom Right
+        this.debug.Ray(new Ray(Vector3.zero, NormalizedImageToWorldCoord(1f, 0f)), Color.blue);
+
+
+        // Debug Rays
+        // Loop
+        for (int i=0; i<image.Width; i++)
+        {
+            for (int j=0; j<image.Height; j++)
+            {
+                this.debug.Ray(new Ray(Vector3.zero, NormalizedImageToWorldCoord((i+0.5f) / image.Width, (j+0.5f) / image.Height)), Color.white);
+            }
+        }       
     }
 
     private void Render()
     {
         // Render the image here...
+        for (int i = 0; i < image.Width; i++)
+        {
+            for (int j = 0; j < image.Height; j++)
+            {
+                //this.debug.Ray(new Ray(Vector3.zero, NormalizedImageToWorldCoord((i + 0.5f) / image.Width, (j + 0.5f) / image.Height)), Color.white);
+                this.image.SetPixel(i, j, Color.black);
+
+                // Intersecting
+                foreach (var sceneEntity in FindObjectsOfType<SceneEntity>())
+                {
+                    if (sceneEntity.Intersect(new Ray(Vector3.zero, NormalizedImageToWorldCoord((i + 0.5f) / image.Width, (j + 0.5f) / image.Height))) != null)
+                    {
+                        this.image.SetPixel(i, j, sceneEntity.Color());
+                    }
+                }
+
+            }
+
+        }
     }
 
     private Vector3 NormalizedImageToWorldCoord(float x, float y)
